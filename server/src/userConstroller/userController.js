@@ -1,38 +1,74 @@
-import client from "../redisClient.js";
-import makePair from "./makePair.js";
-import addUserTODb from "./addUserToDb.js";
+import makePair from "./makePair.js"
+import adduserToDb from "./addUserToDb.js"
+import client from "../redisClient.js"
 
+/*
+  MAIN MATCHMAKING FUNCTION
+*/
 export async function processUserPairing(io, socket) {
-    try {
-        const userLen = await client.lLen("users");
-        if (userLen <= 0) {
-            const check = await soloUserLeftTheChat(socket);
-            if (check > 0) throw new Error("duplicate user found", socket.username);
 
-            await addUserTODb(socket);
-            io.to(socket.id).emit("waiting", "Waiting for another user to join")
-        } else {
-            //select one user from db and make list of current users and paired user.
-            const userPair = await makePair(userLen, socket)
-            if (!userPair) throw new Error("error selecting pair", socket.username);
+  try {
 
-            userPair.forEach(key => io.to(key.socketId).emit("getStragerData", key));
-        }
-    } catch (err) {
-        socket.emit("errSelectingPair");
-        console.log(err);
+    const userPair = await makePair(socket)
+
+    // No user waiting → put current user in queue
+    if (!userPair) {
+
+      await adduserToDb(socket)
+
+      io.to(socket.id).emit(
+        "waiting",
+        "Waiting for another user to join"
+      )
+
+      return
     }
+
+    // Pair found → notify both users
+    userPair.forEach(user => {
+
+      io.to(user.socketId).emit(
+        "getStrangerData",
+        user
+      )
+
+    })
+
+  } catch (err) {
+
+    console.log("Pairing error:", err)
+    socket.emit("errSelectingPair")
+
+  }
+
 }
 
+
+/*
+  USER LEFT CHAT
+  remove them from redis queue
+*/
 export async function soloUserLeftTheChat(socket) {
-    try {
-        const check = await client.lRem("users", 1, JSON.stringify({
-            'socketId': socket.id,
-            'username': socket.username
-        }));
-        console.log(socket.username, "left the chat", check);
-        return check;
-    } catch (err) {
-        console.log(err);
-    }
+
+  try {
+
+    const check = await client.lRem(
+      "users",
+      1,
+      JSON.stringify({
+        socketId: socket.id,
+        username: socket.username
+      })
+    )
+
+    console.log(socket.username, "left the chat", check)
+
+    return check
+
+  } catch (err) {
+
+    console.log(err)
+
+  }
+
 }

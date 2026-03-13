@@ -42,7 +42,7 @@ export default function useSocket(
 
     useEffect(() => {
         if (socket) {
-            socket.on('getStragerData', (data) => {
+            socket.on('getStrangerData', (data) => {
                 setStrangerData(data)
                 setStrangerUserId(data.pairedUserId)
                 setStrangerUsername(data.strangerUsername)
