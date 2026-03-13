@@ -1,4 +1,4 @@
-import client from "./redisClient.js";
+import client from "../redisClient.js";
 
 function createUserPair(socket, strangerData) {
 
