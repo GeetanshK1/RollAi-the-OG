@@ -1,13 +1,12 @@
-import { createClient } from 'redis';
-import 'dotenv/config'
+import { createClient } from "redis";
+import "dotenv/config";
 
 const client = createClient({
-    password: process.env.REDIS_PWD,
-    socket: {
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT
-    }
-  });
+  url: process.env.REDIS_URL
+});
 
-
-export default client
+client.on("error", (err) => {
+  console.log("Redis Client Error", err);
+});
+client.connect();
+export default client;ss
