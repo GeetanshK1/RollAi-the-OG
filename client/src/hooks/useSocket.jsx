@@ -16,10 +16,10 @@ export default function useSocket(
 
     useEffect(() => {
         if (username) {
-            const newSocket = io("http://localhost:3000", {
-                transports: ['websocket'],
-                auth: { username: username }
-            });
+            const newSocket = io("https://rollai-og-server.onrender.com", {
+  transports: ["websocket"],
+  auth: { username: username }
+});
             setSocket(newSocket);
 
             return () => {
