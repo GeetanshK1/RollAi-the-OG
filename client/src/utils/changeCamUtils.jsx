@@ -12,6 +12,9 @@ export async function changeCam(setChangeCamOverly, selectedDeviceId, localVideo
             const stream = await openMediaStream(selectedDeviceId);
             localVideo.srcObject = stream;
             setStream(stream);
+             stream.getTracks().forEach(track => {
+             peerConnection.addTrack(track, stream)
+             })
             const newVideoTrack = stream.getVideoTracks()[0];
             const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
             if (sender) {
