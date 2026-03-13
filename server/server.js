@@ -6,6 +6,9 @@ import { handelSocketConnection } from "./src/socketRoutes.js";
 import 'dotenv/config'
 
 const app = express();
+app.get("/",(req, res) => {
+  res.send("server is running");
+});
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
